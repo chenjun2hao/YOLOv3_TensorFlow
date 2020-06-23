@@ -5,20 +5,30 @@ import os
 
 names_dict = {}
 cnt = 0
-f = open('./voc_names.txt', 'r').readlines()
+f = open('./experiments_helmet/voc_names.txt', 'r').readlines()
 for line in f:
     line = line.strip()
     names_dict[line] = cnt
     cnt += 1
 
-voc_07 = '/data/VOCdevkit/VOC2007'
-voc_12 = '/data/VOCdevkit/VOC2012'
+# voc_07 = '/home/yangna/data/helmet/VOC2028'
+# voc_12 = '/data/VOCdevkit/VOC2012'
+#
+# anno_path = [os.path.join(voc_07, 'Annotations'), os.path.join(voc_12, 'Annotations')]
+# img_path = [os.path.join(voc_07, 'JPEGImages'), os.path.join(voc_12, 'JPEGImages')]
+#
+# trainval_path = [os.path.join(voc_07, 'ImageSets/Main/trainval.txt'),
+#                  os.path.join(voc_12, 'ImageSets/Main/trainval.txt')]
+# test_path = [os.path.join(voc_07, 'ImageSets/Main/test.txt')]
 
-anno_path = [os.path.join(voc_07, 'Annotations'), os.path.join(voc_12, 'Annotations')]
-img_path = [os.path.join(voc_07, 'JPEGImages'), os.path.join(voc_12, 'JPEGImages')]
+# for helmet train
+voc_07 = '/home/yangna/data/helmet/VOC2028'
+# voc_12 = '/data/VOCdevkit/VOC2012'
 
-trainval_path = [os.path.join(voc_07, 'ImageSets/Main/trainval.txt'),
-                 os.path.join(voc_12, 'ImageSets/Main/trainval.txt')]
+anno_path = [os.path.join(voc_07, 'Annotations')]
+img_path = [os.path.join(voc_07, 'JPEGImages')]
+
+trainval_path = [os.path.join(voc_07, 'ImageSets/Main/trainval.txt')]
 test_path = [os.path.join(voc_07, 'ImageSets/Main/test.txt')]
 
 
@@ -44,7 +54,7 @@ def parse_xml(path):
 
         name = str(names_dict[name])
         objects.extend([name, xmin, ymin, xmax, ymax])
-    if len(objects) > 1:
+    if len(objects) > 3:
         return objects
     else:
         return None
@@ -91,6 +101,6 @@ def gen_train_txt(txt_path):
     f.close()
 
 
-gen_train_txt('train.txt')
-gen_test_txt('val.txt')
+gen_train_txt('../data/my_data/train.txt')
+gen_test_txt('../data/my_data/val.txt')
 

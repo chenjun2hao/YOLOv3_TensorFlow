@@ -1,6 +1,12 @@
-#  YOLOv3_TensorFlow
+#  Atlas500 YOLOv3_TensorFlow
 
 ### 1. Introduction
+
+该项目fork from[https://github.com/wizyoung/YOLOv3_TensorFlow](https://github.com/wizyoung/YOLOv3_TensorFlow)
+
+- tensorflow的训练，测试完全基于原项目
+- 修改了tensorflow模型转pd模型（主要修改）
+- 增加了Atlas500检测结果可视化的脚本
 
 This is my implementation of [YOLOv3](https://pjreddie.com/media/files/papers/YOLOv3.pdf) in pure TensorFlow. It contains the full pipeline of training and evaluation on your own dataset. The key features of this repo are:
 
@@ -16,73 +22,25 @@ Python version: 2 or 3
 
 Packages:
 
-- tensorflow >= 1.8.0 (theoretically any version that supports tf.data is ok)
+- tensorflow >= 1.8.0 (我用的是1.8.0)
 - opencv-python
 - tqdm
 
-### 3. Weights convertion
+或者直接根据配置文件安装依赖环境
 
-The pretrained darknet weights file can be downloaded [here](https://pjreddie.com/media/files/yolov3.weights). Place this weights file under directory `./data/darknet_weights/` and then run:
+`pip install -r requirements.txt`
 
-```shell
-python convert_weight.py
-```
+### 3. 原项目测试
 
-Then the converted TensorFlow checkpoint file will be saved to `./data/darknet_weights/` directory.
+这里就跳过了
 
-You can also download the converted TensorFlow checkpoint file by me via [[Google Drive link](https://drive.google.com/drive/folders/1mXbNgNxyXPi7JNsnBaxEv1-nWr7SVoQt?usp=sharing)] or [[Github Release](https://github.com/wizyoung/YOLOv3_TensorFlow/releases/)] and then place it to the same directory.
+### 4. Training
 
-### 4. Running demos
+按照原项目的说明一步一步走，经测试是可以走通的。
 
-There are some demo images and videos under the `./data/demo_data/`. You can run the demo by:
+- 安全帽数据集下载地址：[安全帽数据集](https://pan.baidu.com/s/1UbFkGm4EppdAU660Vu7SdQ?errno=0&errmsg=Auth%20Login%20Sucess&&bduss=&ssnerror=0&traceid=)
 
-Single image test demo:
-
-```shell
-python test_single_image.py ./data/demo_data/messi.jpg
-```
-
-Video test demo:
-
-```shell
-python video_test.py ./data/demo_data/video.mp4
-```
-
-Some results:
-
-![](https://github.com/wizyoung/YOLOv3_TensorFlow/blob/master/data/demo_data/results/dog.jpg?raw=true)
-
-![](https://github.com/wizyoung/YOLOv3_TensorFlow/blob/master/data/demo_data/results/messi.jpg?raw=true)
-
-![](https://github.com/wizyoung/YOLOv3_TensorFlow/blob/master/data/demo_data/results/kite.jpg?raw=true)
-
-Compare the kite detection results with TensorFlow's offical API result [here](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/img/kites_detections_output.jpg).
-
-(The kite detection result is under input image resolution 1344x896)
-
-### 5. Inference speed
-
-How fast is the inference speed? With images scaled to 416*416:
-
-
-| Backbone              |   GPU    | Time(ms) |
-| :-------------------- | :------: | :------: |
-| Darknet-53 (paper)    | Titan X  |    29    |
-| Darknet-53 (my impl.) | Titan XP |   ~23    |
-
-why is it so fast? Check the ImageNet classification result comparision from the paper:
-
-![](https://github.com/wizyoung/YOLOv3_TensorFlow/blob/master/docs/backbone.png?raw=true)
-
-### 6. Model architecture
-
-For better understanding of the model architecture, you can refer to the following picture. With great thanks to [Levio](https://blog.csdn.net/leviopku/article/details/82660381) for your excellent work!
-
-![](https://github.com/wizyoung/YOLOv3_TensorFlow/blob/master/docs/yolo_v3_architecture.png?raw=true)
-
-### 7. Training
-
-#### 7.1 Data preparation 
+#### 4.1 Data preparation 
 
 (1) annotation file
 
@@ -127,7 +85,7 @@ The COCO dataset anchors offered by YOLO's author is placed at `./data/yolo_anch
 
 The yolo anchors computed by the kmeans script is on the resized image scale.  The default resize method is the letterbox resize, i.e., keep the original aspect ratio in the resized image.
 
-#### 7.2 Training
+#### 4.2 Training
 
 Using `train.py`. The hyper-parameters and the corresponding annotations can be found in `args.py`:
 
@@ -137,88 +95,86 @@ CUDA_VISIBLE_DEVICES=GPU_ID python train.py
 
 Check the `args.py` for more details. You should set the parameters yourself in your own specific task.
 
-### 8. Evaluation
+### 5. 测试
 
-Using `eval.py` to evaluate the validation or test dataset. The parameters are as following:
+这里用单张图片的测试脚本 `test_single_image.py` 进行测试.需要修改三个地方
+
+- anchor_path:     训练用anchores写入的text
+- class_name_path: 训练用类别名字/顺序
+- restore_path:    预训练模型的位置
 
 ```shell
-$ python eval.py -h
-usage: eval.py [-h] [--eval_file EVAL_FILE] 
-               [--restore_path RESTORE_PATH]
-               [--anchor_path ANCHOR_PATH] 
-               [--class_name_path CLASS_NAME_PATH]
-               [--batch_size BATCH_SIZE]
-               [--img_size [IMG_SIZE [IMG_SIZE ...]]]
-               [--num_threads NUM_THREADS]
-               [--prefetech_buffer PREFETECH_BUFFER]
-               [--nms_threshold NMS_THRESHOLD]
-               [--score_threshold SCORE_THRESHOLD] 
-               [--nms_topk NMS_TOPK]
+$ python test_single_image.py -h
+usage: test_single_image.py [-h] [--input_image INPUT_IMAGE]
+                            [--anchor_path ANCHOR_PATH]
+                            [--new_size [NEW_SIZE [NEW_SIZE ...]]]
+                            [--letterbox_resize LETTERBOX_RESIZE]
+                            [--class_name_path CLASS_NAME_PATH]
+                            [--restore_path RESTORE_PATH]
 ```
 
-Check the `eval.py` for more details. You should set the parameters yourself. 
+### 6. 转pd模型
 
-You will get the loss, recall, precision, average precision and mAP metrics results.
+这里直接写好了脚本 `convert_weight.py` , 只需要按自己的训练时的配置修改相关超参数就行
+```python
+num_class = 80      # 0. 类别和输入尺寸和训练时保持一直
+img_size = 416
+ckpt_path = "./yolov3_weights/yolov3.ckpt"
+save_path = './checkpoint/yolov3_coco.pd'
+anchors = parse_anchors("./data/yolo_anchors.txt")
+```
 
-For higher mAP, you should set score_threshold to a small number.
+### 7. pd模型转om模型
 
-### 9. Some tricks
+前提：需要安装好Atlas500 DDK，并配置好相应的环境变量
 
-Here are some training tricks in my experiment:
+从Atlas500原始的samples中拷贝出aipp_yolov3_picture.cfg,不用修改其中参数。
 
-(1) Apply the two-stage training strategy or the one-stage training strategy:
+```shell
+omg --model ./yolov3_helmet.pd --framework 3 --output ./yolov3_helmet --insert_op_conf ./aipp_yolov3_picture.cfg --input_shape "Placeholder:1,416,416,3"
+```
 
-Two-stage training:
+### 8. Atlas500推理修改/测试
 
-First stage: Restore `darknet53_body` part weights from COCO checkpoints, train the `yolov3_head` with big learning rate like 1e-3 until the loss reaches to a low level.
+(1) 推理修改
 
-Second stage: Restore the weights from the first stage, then train the whole model with small learning rate like 1e-4 or smaller. At this stage remember to restore the optimizer parameters if you use optimizers like adam.
+这里用InferObjectDetection项目进行推理。修改ObjectDetectionEngine.h中line52处两行
+```cpp
+const int CLASS_NUM = 2;
+static float g_biases[BIASES_NUM] = {5,5, 6,7, 7,9, 10,11, 13,15, 19,21, 27,31, 43,50, 79,93};      // 训练时用的anchor尺寸超参数
+```
 
-One-stage training:
+(2) 编译
 
-Just restore the whole weight file except the last three convolution layers (Conv_6, Conv_14, Conv_22). In this condition, be careful about the possible nan loss value.
+```bash
+bash ./build.sh A500
+```
 
-(2) I've included many useful training strategies in `args.py`:
+(3) 测试
 
-- Cosine decay of lr (SGDR)
-- Multi-scale training
-- Label smoothing
-- Mix up data augmentation
-- Focal loss
+将编译得到的 `out` 文件夹+om模型+测试图片上传到Atlas500上
 
-These are all good strategies but it does **not** mean they will definitely improve the performance. You should choose the appropriate strategies for your own task.
+```shell
+./ObjectDetection -i 2_1.jpg -t 1 -m ./yolov3_helmet.om -g ./graph.config -s 0 -e 0
 
-This [paper](https://arxiv.org/abs/1902.04103) from gluon-cv has proved that data augmentation is critical to YOLO v3, which is completely in consistent with my own experiments. Some data augmentation strategies that seems reasonable may lead to poor performance. For example, after introducing random color jittering, the mAP on my own dataset drops heavily. Thus I hope  you pay extra attention to the data augmentation.
+> #0, bbox( 242,   59,  364,  190) confidence: 0.899212 classId is 0 
+> #1, bbox( 357,   27,  477,  162) confidence: 0.958893 classId is 1 
+> #2, bbox(  54,  112,  153,  231) confidence: 0.842112 classId is 1 
+```
 
-(4) Loss nan? Setting a bigger warm_up_epoch number or smaller learning rate and try several more times. If you fine-tune the whole model, using adam may cause nan value sometimes. You can try choosing momentum optimizer.
+### 9. 结果可视化
 
-### 10. Fine-tune on VOC dataset
+将打印出来的检测+置信度+类别结果拷贝出来， 按copy的值修改 `atlas_result_draw.py` 中 `bbox` 的值。
 
-I did a quick train on the VOC dataset. The params I used in my experiments are included under `misc/experiments_on_voc/` folder for your reference. The train dataset is the VOC 2007 + 2012 trainval set, and the test dataset is the VOC 2007 test set.
+`python atlas_result_draw.py`
 
-Finally with the 416\*416 input image, I got a 87.54% test mAP (not using the 07 metric). No hard-try fine-tuning. You should get the similar or better results.
+<img src="./data/demo_data/000009.jpg" width=300> </img>
+<img src="./data/demo_data/Atlas500.png" width=300> </img>
 
-My pretrained weights on VOC dataset can be downloaded [here](https://drive.google.com/drive/folders/1ICKcJPozQOVRQnE1_vMn90nr7dejg0yW?usp=sharing).
+## 问题
 
-### 11. TODO
+- [ ] atlas输出的结果和tensorflow的结果有一定的差别
 
-[ ] Multi-GPUs with sync batch norm. 
+## Reference
 
-[ ] Maybe tf 2.0 ?
-
--------
-
-### Credits:
-
-I referred to many fantastic repos during the implementation:
-
-[YunYang1994/tensorflow-yolov3](https://github.com/YunYang1994/tensorflow-yolov3)
-
-[qqwweee/keras-yolo3](https://github.com/qqwweee/keras-yolo3)
-
-[eriklindernoren/PyTorch-YOLOv3](https://github.com/eriklindernoren/PyTorch-YOLOv3)
-
-[pjreddie/darknet](https://github.com/pjreddie/darknet)
-
-[dmlc/gluon-cv](https://github.com/dmlc/gluon-cv/tree/master/scripts/detection/yolo)
-
+1. [https://github.com/wizyoung/YOLOv3_TensorFlow](https://github.com/wizyoung/YOLOv3_TensorFlow)

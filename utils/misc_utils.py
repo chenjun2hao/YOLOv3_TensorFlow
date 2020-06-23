@@ -126,6 +126,20 @@ def load_weights(var_list, weights_file):
     return assign_ops
 
 
+# 讲模型转换为一个模型文件
+def freeze_graph(sess, output_file, output_node_names):
+    output_graph_def = tf.graph_util.convert_variables_to_constants(  # 讲变量转化为常量
+        sess,
+        sess.graph.as_graph_def(),
+        output_node_names,
+    )
+
+    with tf.gfile.GFile(output_file, "wb") as f:
+        f.write(output_graph_def.SerializeToString())
+    # .output_graph_def.node 图中所有的节点
+    print("=> {} ops written to {}.".format(len(output_graph_def.node), output_file))
+
+
 def config_learning_rate(args, global_step):
     if args.lr_type == 'exponential':
         lr_tmp = tf.train.exponential_decay(args.learning_rate_init, global_step, args.lr_decay_freq,

@@ -15,18 +15,24 @@ from utils.data_aug import letterbox_resize
 from model import yolov3
 
 parser = argparse.ArgumentParser(description="YOLO-V3 test single image test procedure.")
-parser.add_argument("input_image", type=str,
+parser.add_argument("--input_image", type=str, default='./data/demo_data/000009.jpg',
                     help="The path of the input image.")
-parser.add_argument("--anchor_path", type=str, default="./data/yolo_anchors.txt",
+parser.add_argument("--anchor_path", type=str, default="./data/my_data/helmet_anchors.txt",
                     help="The path of the anchor txt file.")
+# parser.add_argument("--anchor_path", type=str, default="./data/yolo_anchors.txt",
+#                     help="The path of the anchor txt file.")
 parser.add_argument("--new_size", nargs='*', type=int, default=[416, 416],
                     help="Resize the input image with `new_size`, size format: [width, height]")
 parser.add_argument("--letterbox_resize", type=lambda x: (str(x).lower() == 'true'), default=True,
                     help="Whether to use the letterbox resize.")
-parser.add_argument("--class_name_path", type=str, default="./data/coco.names",
+parser.add_argument("--class_name_path", type=str, default="./data/my_data/helmet_data.names",
                     help="The path of the class names.")
-parser.add_argument("--restore_path", type=str, default="./data/darknet_weights/yolov3.ckpt",
+# parser.add_argument("--class_name_path", type=str, default="./data/coco.names",
+#                     help="The path of the class names.")
+parser.add_argument("--restore_path", type=str, default="./checkpoint/best_model_Epoch_20_step_21167_mAP_0.6431_loss_13.9490_lr_0.0001",
                     help="The path of the weights to restore.")
+# parser.add_argument("--restore_path", type=str, default="./yolov3_weights/yolov3.ckpt",
+#                     help="The path of the weights to restore.")
 args = parser.parse_args()
 
 args.anchors = parse_anchors(args.anchor_path)
